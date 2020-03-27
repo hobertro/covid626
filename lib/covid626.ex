@@ -14,8 +14,8 @@ defmodule Covid626 do
           {_, _, a} = row # pattern matching to only get the lists of relevant data
         a
         end)
-        |> filter_for_sgv
-        |> get_values_for_cities
+         |> filter_for_sgv
+         |> get_values_for_cities
         total = total_cases(response)
         {:ok, response, total}
       {:ok, %HTTPoison.Response{status_code: 404}} ->
@@ -27,9 +27,9 @@ defmodule Covid626 do
 
   def filter_for_sgv(list) do
     Enum.filter(list, fn value -> 
-      [head | tail] = value
+      [head | _] = value
       {_, _, list} = head
-      [head | tail] = list
+      [head | _] = list
       str = head
       str = filter_misc_values(str)
       Enum.member?(@san_gabriel_valley, str)
@@ -50,8 +50,8 @@ defmodule Covid626 do
   def filter_misc_values(city) do
     str = String.replace_leading(city, "- ", "")
     str = String.replace_trailing(str, "***", "")
-    str =String.replace_trailing(city, "**", "")
-    String.replace_trailing(city, "*", "")
+    str = String.replace_trailing(str, "**", "")
+    String.replace_trailing(str, "*", "")
   end
 
   def total_cases(list) do
