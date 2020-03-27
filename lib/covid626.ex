@@ -2,11 +2,11 @@ defmodule Covid626 do
   @san_gabriel_valley ["Alhambra", "Altadena", "Arcadia", "Avocado Heights", "Azusa", "Baldwin Park", 
   "Basset", "Bradbury", "Charter Oak", "Citrus", "Covina", "Duarte", "East Pasadena", "East San Gabriel",
   "El Monte", "Glendora", "Hacienda Heights", "City of Industry", "Industry", "Irwindale", "La Puente",
-  "Mayflower Village", "Monrovia", "Monterey Park", "North El Monte", "El Monte", "Pasadena", "Rosemead",
+  "Mayflower Village", "Monrovia", "Monterey Park", "North El Monte", "El Monte", "Pasadena", "- Pasadena", "Rosemead",
   "Rowland Heights", "San Gabriel", "San Marino", "Sierra Madre", "South El Monte", "South Pasadena", "South San Gabriel",
   "South San Jose Hills", "Temple City", "Valinda", "Vincent", "Walnut", "West Covina", "West Puente Valley"]
 
-  def testz() do
+  def get_data() do
     case HTTPoison.get("http://www.publichealth.lacounty.gov/media/Coronavirus/locations.htm") do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         response = body |> Floki.find("tr")
@@ -31,6 +31,7 @@ defmodule Covid626 do
       {_, _, list} = head
       [head | tail] = list
       str = head
+      str = filter_misc_values(str)
       Enum.member?(@san_gabriel_valley, str)
     end)
   end
@@ -44,6 +45,13 @@ defmodule Covid626 do
       number = List.first(number)
       {city, number}
     end)
+  end
+
+  def filter_misc_values(city) do
+    str = String.replace_leading(city, "- ", "")
+    str = String.replace_trailing(str, "***", "")
+    str =String.replace_trailing(city, "**", "")
+    String.replace_trailing(city, "*", "")
   end
 
   def total_cases(list) do
