@@ -5,9 +5,10 @@ defmodule Covid626 do
   "Mayflower Village", "Monrovia", "Monterey Park", "North El Monte", "El Monte", "Pasadena", "- Pasadena", "Rosemead",
   "Rowland Heights", "San Gabriel", "San Marino", "Sierra Madre", "South El Monte", "South Pasadena", "South San Gabriel",
   "South San Jose Hills", "Temple City", "Valinda", "Vincent", "Walnut", "West Covina", "West Puente Valley"]
+  @la_county_gov "http://www.publichealth.lacounty.gov/media/Coronavirus/locations.htm"
 
   def get_data() do
-    case HTTPoison.get("http://www.publichealth.lacounty.gov/media/Coronavirus/locations.htm") do
+    case make_http_request do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         response = body |> Floki.find("tr")
         response = Enum.map(response, fn row ->
@@ -23,6 +24,10 @@ defmodule Covid626 do
       {:error, %HTTPoison.Error{ reason: reason}} ->
         IO.inspect reason
     end
+  end
+
+  def make_http_request do
+    HTTPoison.get(@la_county_gov)
   end
 
   def filter_for_sgv(list) do
@@ -49,6 +54,8 @@ defmodule Covid626 do
 
   def filter_misc_values(city) do
     str = String.replace_leading(city, "- ", "")
+    str = String.replace_leading(city, "City of ", "")
+    # str = String.replace_leading(city, "Unincorporated - ", "")
     str = String.replace_trailing(str, "***", "")
     str = String.replace_trailing(str, "**", "")
     String.replace_trailing(str, "*", "")
@@ -57,7 +64,11 @@ defmodule Covid626 do
   def total_cases(list) do
     Enum.reduce(list, 0, fn(tup, acc) ->
       {_, value} = tup
-      acc + String.to_integer(value)
+      if value == "--" do
+        acc + 0
+      else
+        acc + String.to_integer(value)
+      end
     end)
   end
 end
