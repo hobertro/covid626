@@ -10,13 +10,15 @@ defmodule Covid626 do
   def get_data() do
     case make_http_request do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        response = body |> Floki.find("tr")
-        response = Enum.map(response, fn row ->
+        response = body 
+          |> Floki.find("tr")
+          |> Enum.map(fn row ->
           {_, _, a} = row # pattern matching to only get the lists of relevant data
         a
         end)
          |> filter_for_sgv
          |> get_values_for_cities
+IO.inspect response
         total = total_cases(response)
         {:ok, response, total}
       {:ok, %HTTPoison.Response{status_code: 404}} ->
@@ -35,40 +37,58 @@ defmodule Covid626 do
       [head | _] = value
       {_, _, list} = head
       [head | _] = list
-      str = head
-      str = filter_misc_values(str)
+      str = filter_misc_values(head)
       Enum.member?(@san_gabriel_valley, str)
     end)
   end
 
   def get_values_for_cities(list) do
-    Enum.map(list, fn value -> 
+    map = %{}
+    response = Enum.each(list, fn value -> 
       [head | tail]  = value
       {_, _, city}   = head
       {_, _, number} = List.first(tail)
-      city = List.first(city)
-      number = List.first(number)
-      {city, number}
+      city   = filter_misc_values(List.first(city))
+      number = number_of_cases(List.first(number))
+      if map[city] do
+        Map.update(map, city, String.to_integer(map[city]), &(&1 + String.to_integer(number)))
+      else
+        Map.put(map, city, String.to_integer(number)) 
+      end
     end)
   end
 
+  # def get_values_for_cities(list) do
+  #   Enum.map(list, fn value -> 
+  #     [head | tail]  = value
+  #     {_, _, city}   = head
+  #     {_, _, number} = List.first(tail)
+  #     city   = filter_misc_values(List.first(city))
+  #     number = number_of_cases(List.first(number))x  
+  #     %{city: city, number_of_cases: number}
+  #   end)
+  # end
+
+  def number_of_cases(number) do
+    if number == "--" do
+      "0"
+    else 
+      number
+    end
+  end
+
   def filter_misc_values(city) do
-    str = String.replace_leading(city, "- ", "")
-    str = String.replace_leading(city, "City of ", "")
-    # str = String.replace_leading(city, "Unincorporated - ", "")
-    str = String.replace_trailing(str, "***", "")
-    str = String.replace_trailing(str, "**", "")
-    String.replace_trailing(str, "*", "")
+    String.replace_leading(city, "- ", "")
+     |> String.replace_leading("City of ", "")
+     |> String.replace_leading("Unincorporated - ", "")
+     |> String.replace_trailing("***", "")
+     |> String.replace_trailing("**", "")
+     |> String.replace_trailing("*", "")
   end
 
   def total_cases(list) do
-    Enum.reduce(list, 0, fn(tup, acc) ->
-      {_, value} = tup
-      if value == "--" do
-        acc + 0
-      else
-        acc + String.to_integer(value)
-      end
+    Enum.reduce(list, 0, fn(map, acc) ->
+      acc + String.to_integer(map[:number_of_cases])
     end)
   end
 end
