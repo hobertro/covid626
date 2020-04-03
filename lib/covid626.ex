@@ -18,7 +18,6 @@ defmodule Covid626 do
         end)
          |> filter_for_sgv
          |> get_values_for_cities
-IO.inspect response
         total = total_cases(response)
         {:ok, response, total}
       {:ok, %HTTPoison.Response{status_code: 404}} ->
@@ -42,32 +41,32 @@ IO.inspect response
     end)
   end
 
+  # def get_values_for_cities(list) do
+  #   map = %{}
+  #   response = Enum.each(list, fn value -> 
+  #     [head | tail]  = value
+  #     {_, _, city}   = head
+  #     {_, _, number} = List.first(tail)
+  #     city   = filter_misc_values(List.first(city))
+  #     number = number_of_cases(List.first(number))
+  #     if map[city] do
+  #       Map.update(map, city, String.to_integer(map[city]), &(&1 + String.to_integer(number)))
+  #     else
+  #       Map.put(map, city, String.to_integer(number)) 
+  #     end
+  #   end)
+  # end
+
   def get_values_for_cities(list) do
-    map = %{}
-    response = Enum.each(list, fn value -> 
+    Enum.map(list, fn value -> 
       [head | tail]  = value
       {_, _, city}   = head
       {_, _, number} = List.first(tail)
       city   = filter_misc_values(List.first(city))
       number = number_of_cases(List.first(number))
-      if map[city] do
-        Map.update(map, city, String.to_integer(map[city]), &(&1 + String.to_integer(number)))
-      else
-        Map.put(map, city, String.to_integer(number)) 
-      end
+      %{city: city, number_of_cases: number}
     end)
   end
-
-  # def get_values_for_cities(list) do
-  #   Enum.map(list, fn value -> 
-  #     [head | tail]  = value
-  #     {_, _, city}   = head
-  #     {_, _, number} = List.first(tail)
-  #     city   = filter_misc_values(List.first(city))
-  #     number = number_of_cases(List.first(number))x  
-  #     %{city: city, number_of_cases: number}
-  #   end)
-  # end
 
   def number_of_cases(number) do
     if number == "--" do
