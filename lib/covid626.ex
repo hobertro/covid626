@@ -32,13 +32,20 @@ defmodule Covid626 do
   end
 
   def filter_for_sgv(list) do
-IO.inspect(list)
-IO.inspect "list"
     Enum.filter(list, fn value ->
       value2 = head_filter(value)
-      {_, _, list} = value2
-      value3 = head_filter(value)
-      str          = filter_misc_values(value3)
+      {_, _, list}   = value2
+      value3         = head_filter(value)
+      {_, _, list1 } = value3
+      # [head | tails] = list1
+      # if head is [], need to return ""
+      response = case list1 do
+        [] -> 
+          ""
+        _ ->
+          List.first(list1)
+      end
+      str            = filter_misc_values(response)
       Enum.member?(@san_gabriel_valley, str)
     end)
   end
@@ -51,28 +58,8 @@ IO.inspect "list"
     ["blank string"]
   end
 
-  # def get_values_for_cities(list) do
-  #   map = %{}
-  #   response = Enum.each(list, fn value -> 
-  #     [head | tail]  = value
-  #     {_, _, city}   = head
-  #     {_, _, number} = List.first(tail)
-  #     city   = filter_misc_values(List.first(city))
-  #     number = number_of_cases(List.first(number))
-  #     if map[city] do
-  #       Map.update(map, city, String.to_integer(map[city]), &(&1 + String.to_integer(number)))
-  #     else
-  #       Map.put(map, city, String.to_integer(number)) 
-  #     end
-  #   end)
-  # end
-
   def get_values_for_cities(list) do
-IO.inspect list
-IO.inspect "list"
     Enum.map(list, fn value -> 
-IO.inspect value
-IO.inspect "value"
       [head | tail]  = value
       {_, _, city}   = head
       {_, _, number} = List.first(tail)
@@ -91,8 +78,6 @@ IO.inspect "value"
   end
 
   def filter_misc_values(city) do
-IO.inspect(city)
-IO.inspect "city"
     String.replace_leading(city, "- ", "")
      |> String.replace_leading("City of ", "")
      |> String.replace_leading("Unincorporated - ", "")
