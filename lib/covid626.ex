@@ -13,7 +13,7 @@ defmodule Covid626 do
         response = body 
           |> Floki.find("tr")
           |> Enum.map(fn row ->
-          {_, _, a} = row # pattern matching to only get the lists of relevant data
+          {_, _, a} = row
         a
         end)
          |> filter_for_sgv
@@ -37,8 +37,6 @@ defmodule Covid626 do
       {_, _, list}   = value2
       value3         = head_filter(value)
       {_, _, list1 } = value3
-      # [head | tails] = list1
-      # if head is [], need to return ""
       response = case list1 do
         [] -> 
           ""
@@ -55,7 +53,7 @@ defmodule Covid626 do
   end
 
   def head_filter([]) do
-    ["blank string"]
+    [""]
   end
 
   def get_values_for_cities(list) do
