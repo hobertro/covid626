@@ -11,11 +11,8 @@ defmodule Covid626 do
     case make_http_request do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         response = body 
-          |> Floki.find("tr")
-          |> Enum.map(fn row ->
-          {_, _, a} = row
-        a
-        end)
+         |> Floki.find("tr")
+         |> filter_initial_data
          |> filter_for_sgv
          |> get_values_for_cities
         total = total_cases(response)
@@ -25,6 +22,13 @@ defmodule Covid626 do
       {:error, %HTTPoison.Error{ reason: reason}} ->
         IO.inspect reason
     end
+  end
+
+  def filter_initial_data(list) do
+    Enum.map(list, fn row ->
+      {_, _, a} = row
+      a
+    end)
   end
 
   def make_http_request do
