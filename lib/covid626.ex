@@ -32,13 +32,23 @@ defmodule Covid626 do
   end
 
   def filter_for_sgv(list) do
-    Enum.filter(list, fn value -> 
-      [head | _] = value
-      {_, _, list} = head
-      [head | _] = list
-      str = filter_misc_values(head)
+IO.inspect(list)
+IO.inspect "list"
+    Enum.filter(list, fn value ->
+      value2 = head_filter(value)
+      {_, _, list} = value2
+      value3 = head_filter(value)
+      str          = filter_misc_values(value3)
       Enum.member?(@san_gabriel_valley, str)
     end)
+  end
+
+  def head_filter([head | tail]) do
+    head
+  end
+
+  def head_filter([]) do
+    ["blank string"]
   end
 
   # def get_values_for_cities(list) do
@@ -58,7 +68,11 @@ defmodule Covid626 do
   # end
 
   def get_values_for_cities(list) do
+IO.inspect list
+IO.inspect "list"
     Enum.map(list, fn value -> 
+IO.inspect value
+IO.inspect "value"
       [head | tail]  = value
       {_, _, city}   = head
       {_, _, number} = List.first(tail)
@@ -77,6 +91,8 @@ defmodule Covid626 do
   end
 
   def filter_misc_values(city) do
+IO.inspect(city)
+IO.inspect "city"
     String.replace_leading(city, "- ", "")
      |> String.replace_leading("City of ", "")
      |> String.replace_leading("Unincorporated - ", "")
