@@ -37,19 +37,21 @@ defmodule Covid626 do
 
   def filter_for_sgv(list) do
     Enum.filter(list, fn value ->
-      value2 = head_filter(value)
-      {_, _, list}   = value2
-      value3         = head_filter(value)
-      {_, _, list1 } = value3
-      response = case list1 do
-        [] -> 
-          ""
-        _ ->
-          List.first(list1)
-      end
-      str            = filter_misc_values(response)
-      Enum.member?(@san_gabriel_valley, str)
+      tuple     = List.first(value)
+      city_list  = city_filter(tuple)
+      city_name = filter_misc_values(city_list)
+      Enum.member?(@san_gabriel_valley, city_name)
     end)
+  end
+
+  def city_filter(tuple) do
+    {_, _, list} = tuple
+    case List.first(list) do
+      nil ->
+        ""
+      _ ->
+        List.first(list)
+    end
   end
 
   def head_filter([head | tail]) do
