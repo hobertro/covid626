@@ -25,9 +25,8 @@ defmodule Covid626 do
   end
 
   def filter_initial_data(list) do
-    Enum.map(list, fn row ->
-      {_, _, a} = row
-      a
+    Enum.map(list, fn {_, _, relevant_data} ->
+      relevant_data
     end)
   end
 
@@ -36,16 +35,14 @@ defmodule Covid626 do
   end
 
   def filter_for_sgv(list) do
-    Enum.filter(list, fn value ->
-      tuple     = List.first(value)
+    Enum.filter(list, fn [tuple | tail] ->
       city_list  = city_filter(tuple)
-      city_name = filter_misc_values(city_list)
+      city_name  = filter_misc_values(city_list)
       Enum.member?(@san_gabriel_valley, city_name)
     end)
   end
 
-  def city_filter(tuple) do
-    {_, _, list} = tuple
+  def city_filter({_, _, list}) do
     case List.first(list) do
       nil ->
         ""
@@ -54,21 +51,13 @@ defmodule Covid626 do
     end
   end
 
-  def head_filter([head | tail]) do
-    head
-  end
-
-  def head_filter([]) do
-    [""]
-  end
-
   def get_values_for_cities(list) do
-    Enum.map(list, fn value -> 
-      [head | tail]  = value
-      {_, _, city}   = head
-      {_, _, number} = List.first(tail)
+    Enum.map(list, fn value ->
+      [city_tuple, number_tuple, _]  = value
+      {_, _, city}                   = city_tuple
+      {_, _, number_of_cases}        = number_tuple
       city   = filter_misc_values(List.first(city))
-      number = number_of_cases(List.first(number))
+      number = number_of_cases(List.first(number_of_cases))
       %{city: city, number_of_cases: number}
     end)
   end
