@@ -32,7 +32,3 @@ npm-debug.log
 # we ignore priv/static. You may want to comment
 # this depending on your deployment strategy.
 /priv/static/
-
-# ignore covid626_lib
-/lib/covid626_lib/_build
-/lib/covid626_lib/deps
